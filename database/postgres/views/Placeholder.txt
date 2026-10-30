@@ -1,1 +1,0 @@
-We put our views of prostgres in here. Keep this for now so the structure comes. Decide what to do later.
