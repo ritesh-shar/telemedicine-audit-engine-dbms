@@ -73,10 +73,12 @@ CREATE TABLE consultations (
     appointment_id UUID NOT NULL UNIQUE
         REFERENCES appointments(appointment_id),
     mongo_document_id VARCHAR(100) UNIQUE,
-    consultation_status VARCHAR(20) NOT NULL DEFAULT 'IN_PROGRESS'
+    consultation_status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
         CHECK (consultation_status IN (
+            'PENDING',
             'IN_PROGRESS',
-            'COMPLETED'
+            'COMPLETED',
+            'FAILED'
         )),
     started_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMPTZ
@@ -87,10 +89,6 @@ CREATE TABLE prescriptions (
     prescription_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     consultation_id UUID NOT NULL
         REFERENCES consultations(consultation_id),
-    patient_id UUID NOT NULL
-        REFERENCES patients(patient_id),
-    doctor_id UUID NOT NULL
-        REFERENCES doctors(doctor_id),
     prescribed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     instructions TEXT,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'

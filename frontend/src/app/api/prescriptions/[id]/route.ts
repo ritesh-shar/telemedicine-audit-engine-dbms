@@ -77,7 +77,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       instructions: string | null;
       status: "ACTIVE" | "REVOKED";
     }>(
-      `SELECT p.prescription_id, p.consultation_id, p.patient_id, p.doctor_id,
+      `SELECT p.prescription_id, p.consultation_id, a.patient_id, a.doctor_id,
               p.prescribed_at, p.instructions, p.status
        FROM prescriptions p
        JOIN consultations c ON c.consultation_id = p.consultation_id
@@ -97,8 +97,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       `UPDATE prescriptions
        SET status = $1
        WHERE prescription_id = $2
-       RETURNING prescription_id, consultation_id, patient_id, doctor_id,
-                 prescribed_at, instructions, status`,
+       RETURNING prescription_id, consultation_id, prescribed_at, instructions, status`,
       [input.status, prescriptionId.data]
     );
 
