@@ -23,6 +23,7 @@ interface Appointment {
 export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [error, setError] = useState("");
+  const [updating, setUpdating] = useState("");
 
   useEffect(() => {
     fetch("/api/appointments")
@@ -35,6 +36,31 @@ export default function AppointmentsPage() {
         setError(reason instanceof Error ? reason.message : "Unable to load appointments.")
       );
   }, []);
+
+  async function updateAppointmentStatus(appointmentId: string, status: "CONFIRMED" | "COMPLETED") {
+    setUpdating(appointmentId);
+    setError("");
+    try {
+      const response = await fetch(`/api/appointments/${appointmentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Unable to update appointment.");
+      setAppointments((current) =>
+        current.map((appointment) =>
+          appointment.appointmentId === appointmentId
+            ? { ...appointment, status }
+            : appointment
+        )
+      );
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : "Unable to update appointment.");
+    } finally {
+      setUpdating("");
+    }
+  }
 
   return (
     <AppShell active="appointments">
@@ -64,9 +90,33 @@ export default function AppointmentsPage() {
                   <td className="px-6 py-4 text-slate-400">{appointment.reason ?? "General consultation"}</td>
                   <td className="px-6 py-4"><StatusPill status={appointment.consultationStatus ?? appointment.status} /></td>
                   <td className="px-6 py-4">
-                    <a className="text-cyan-400 hover:text-cyan-300" href={appointment.consultationId ? `/doctor/consultations/${appointment.consultationId}` : `/doctor/consultations/new?appointmentId=${appointment.appointmentId}`}>
-                      {appointment.consultationId ? "Open consultation" : "Start consultation"}
-                    </a>
+                    <div className="flex flex-wrap items-center gap-4">
+                      {(appointment.status === "CONFIRMED" || appointment.status === "COMPLETED" || appointment.consultationId) && (
+                        <a className="text-cyan-400 hover:text-cyan-300" href={appointment.consultationId ? `/doctor/consultations/${appointment.consultationId}` : `/doctor/consultations/new?appointmentId=${appointment.appointmentId}`}>
+                          {appointment.consultationId ? "Open consultation" : "Start consultation"}
+                        </a>
+                      )}
+                      {appointment.status === "SCHEDULED" && (
+                        <button
+                          type="button"
+                          disabled={updating === appointment.appointmentId}
+                          onClick={() => updateAppointmentStatus(appointment.appointmentId, "CONFIRMED")}
+                          className="text-sm font-medium text-cyan-300 hover:text-cyan-200 disabled:opacity-50"
+                        >
+                          {updating === appointment.appointmentId ? "Saving..." : "Confirm"}
+                        </button>
+                      )}
+                      {appointment.status === "CONFIRMED" && (
+                        <button
+                          type="button"
+                          disabled={updating === appointment.appointmentId}
+                          onClick={() => updateAppointmentStatus(appointment.appointmentId, "COMPLETED")}
+                          className="text-sm font-medium text-emerald-300 hover:text-emerald-200 disabled:opacity-50"
+                        >
+                          {updating === appointment.appointmentId ? "Saving..." : "Mark done"}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
