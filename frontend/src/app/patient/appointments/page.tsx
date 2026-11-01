@@ -104,7 +104,7 @@ function BookingPage() {
             <div>
               <label htmlFor="doctor" className="mb-1.5 block text-sm font-semibold">Doctor</label>
               <select id="doctor" value={doctorId} onChange={(event) => { setDoctorId(event.target.value); setSlot(""); }}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3">
+                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-slate-900">
                 <option value="">Select a doctor</option>
                 {doctors.filter((doctor) => doctor.availability).map((doctor) => (
                   <option key={doctor.doctorId} value={doctor.doctorId}>{doctor.displayName} - {doctor.specialization}</option>
@@ -115,12 +115,12 @@ function BookingPage() {
               <label htmlFor="date" className="mb-1.5 block text-sm font-semibold">Date</label>
               <input id="date" type="date" min={today} value={date}
                 onChange={(event) => { setDate(event.target.value); setSlot(""); }}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-3" />
+                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-slate-900 scheme-light" />
             </div>
             <div>
               <label htmlFor="reason" className="mb-1.5 block text-sm font-semibold">Reason for visit (optional)</label>
               <textarea id="reason" rows={5} maxLength={1000} value={reason} onChange={(event) => setReason(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-3" placeholder="Briefly describe your symptoms" />
+                className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-slate-900 placeholder:text-slate-500" placeholder="Briefly describe your symptoms" />
             </div>
           </div>
 

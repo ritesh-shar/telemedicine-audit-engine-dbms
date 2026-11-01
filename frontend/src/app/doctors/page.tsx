@@ -63,7 +63,14 @@ export default function DoctorsPage() {
             ))}
           </div>
         )}
-        {!loading && !error && doctors.length === 0 && <p className="mt-8 rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">No doctors are registered yet.</p>}
+        {!loading && !error && doctors.length === 0 && (
+          <div className="mt-8 rounded-xl border border-dashed border-slate-300 p-8 text-center">
+            <p className="font-semibold text-slate-700">No doctors are available.</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Confirm that PostgreSQL is running and apply database/postgres/seeds/020_doctors.sql.
+            </p>
+          </div>
+        )}
       </main>
     </>
   );

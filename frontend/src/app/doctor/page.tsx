@@ -110,11 +110,11 @@ export function AppointmentList({ appointments }: { appointments: Appointment[] 
               <Link className="text-sm font-medium text-cyan-400 hover:text-cyan-300" href={`/doctor/consultations/${appointment.consultationId}`}>
                 Open
               </Link>
-            ) : (
+            ) : appointment.status === "CONFIRMED" || appointment.status === "COMPLETED" ? (
               <Link className="text-sm font-medium text-cyan-400 hover:text-cyan-300" href={`/doctor/consultations/new?appointmentId=${appointment.appointmentId}`}>
                 Start
               </Link>
-            )}
+            ) : null}
           </div>
         </div>
       ))}

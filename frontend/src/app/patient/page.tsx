@@ -12,6 +12,21 @@ interface Appointment {
   doctorSpecialization: string;
 }
 
+interface Prescription {
+  prescriptionId: string;
+  consultationId: string;
+  prescribedAt: string;
+  instructions: string | null;
+  status: "ACTIVE" | "REVOKED";
+  items: Array<{
+    medicineName: string;
+    dosage: string;
+    frequency: string;
+    duration: string;
+    quantity: number | null;
+  }>;
+}
+
 const statusStyle: Record<string, string> = {
   SCHEDULED: "bg-blue-50 text-blue-700",
   CONFIRMED: "bg-teal-50 text-teal-700",
@@ -23,13 +38,24 @@ export default function PatientDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
 
   useEffect(() => {
-    fetch("/api/appointments")
-      .then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error ?? "Unable to load appointments.");
-        setAppointments(data.appointments ?? []);
+    Promise.all([
+      fetch("/api/appointments"),
+      fetch("/api/prescriptions"),
+    ])
+      .then(async ([appointmentResponse, prescriptionResponse]) => {
+        const appointmentData = await appointmentResponse.json();
+        const prescriptionData = await prescriptionResponse.json();
+        if (!appointmentResponse.ok) {
+          throw new Error(appointmentData.error ?? "Unable to load appointments.");
+        }
+        if (!prescriptionResponse.ok) {
+          throw new Error(prescriptionData.error ?? "Unable to load prescriptions.");
+        }
+        setAppointments(appointmentData.appointments ?? []);
+        setPrescriptions(prescriptionData.prescriptions ?? []);
       })
       .catch((reason) => setError(reason instanceof Error ? reason.message : "Unable to load appointments."))
       .finally(() => setLoading(false));
@@ -91,12 +117,32 @@ export default function PatientDashboard() {
             <aside className="lg:col-span-2">
               <div className="rounded-2xl border border-slate-200 bg-white p-5">
                 <h2 className="text-xl font-bold">Prescriptions</h2>
-                <p className="mt-2 text-sm text-slate-600">Prescription records are returned by the separate prescription service, not read directly from MongoDB in the browser.</p>
-                <div className="mt-4 rounded-xl bg-slate-50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Integration shape</p>
-                  <code className="mt-2 block text-xs text-slate-700">GET /api/prescriptions?patientId=:id</code>
-                  <p className="mt-2 text-xs text-slate-500">Expected fields: prescriptionId, appointmentId, medications[], diagnosis, issuedAt.</p>
-                </div>
+                {prescriptions.length === 0 ? (
+                  <p className="mt-3 text-sm text-slate-600">No prescriptions have been issued yet.</p>
+                ) : (
+                  <div className="mt-4 space-y-3">
+                    {prescriptions.map((prescription) => (
+                      <article key={prescription.prescriptionId} className="rounded-xl bg-slate-50 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="font-semibold text-slate-900">
+                            {new Date(prescription.prescribedAt).toLocaleDateString()}
+                          </p>
+                          <span className="text-xs font-semibold text-teal-700">{prescription.status}</span>
+                        </div>
+                        {prescription.instructions && (
+                          <p className="mt-2 text-sm text-slate-600">{prescription.instructions}</p>
+                        )}
+                        <ul className="mt-3 space-y-1 text-sm text-slate-700">
+                          {prescription.items.map((item, index) => (
+                            <li key={`${prescription.prescriptionId}-${index}`}>
+                              {item.medicineName} - {item.dosage}, {item.frequency}, {item.duration}
+                            </li>
+                          ))}
+                        </ul>
+                      </article>
+                    ))}
+                  </div>
+                )}
               </div>
             </aside>
           </div>

@@ -225,6 +225,9 @@ export function ConsultationWorkspace({
                         Revoke
                       </button>
                     )}
+                    <button type="button" className="text-xs text-slate-400 hover:text-white" onClick={() => removePrescription(prescription.prescriptionId, setPrescriptions, setError)}>
+                      Remove
+                    </button>
                   </div>
                 </div>
                 <p className="mt-2 text-sm text-slate-400">{prescription.items.map((item) => `${item.medicineName} · ${item.dosage} · ${item.frequency}`).join(" | ")}</p>
@@ -259,6 +262,26 @@ async function revokePrescription(
         ? { ...prescription, status: "REVOKED" }
         : prescription
     )
+  );
+}
+
+async function removePrescription(
+  prescriptionId: string,
+  setPrescriptions: React.Dispatch<React.SetStateAction<Prescription[]>>,
+  setError: React.Dispatch<React.SetStateAction<string>>
+) {
+  if (!window.confirm("Remove this prescription permanently?")) return;
+
+  const response = await fetch(`/api/prescriptions/${prescriptionId}`, {
+    method: "DELETE"
+  });
+  const data = await response.json();
+  if (!response.ok) {
+    setError(data.error ?? "Unable to remove prescription.");
+    return;
+  }
+  setPrescriptions((current) =>
+    current.filter((prescription) => prescription.prescriptionId !== prescriptionId)
   );
 }
 

@@ -125,3 +125,68 @@ export async function PATCH(request: Request, context: RouteContext) {
     client?.release();
   }
 }
+
+export async function DELETE(_request: Request, context: RouteContext) {
+  let client;
+
+  try {
+        const user = await requireAuthenticatedUser();
+        if (user.role !== "DOCTOR") {
+          return NextResponse.json(
+            { error: "Only doctors can remove prescriptions." },
+            { status: 403 }
+          );
+        }
+
+        const { id } = await context.params;
+        const prescriptionId = z.string().uuid().safeParse(id);
+        if (!prescriptionId.success) {
+          return NextResponse.json({ error: "Prescription not found." }, { status: 404 });
+        }
+
+        client = await getPostgresPool().connect();
+        await client.query("BEGIN");
+        await client.query("SELECT set_config('app.current_user_id', $1, true)", [
+          user.userId
+        ]);
+
+        const existing = await client.query<{ prescription_id: string }>(
+          `SELECT p.prescription_id
+           FROM prescriptions p
+           JOIN consultations c ON c.consultation_id = p.consultation_id
+           JOIN appointments a ON a.appointment_id = c.appointment_id
+           JOIN doctors d ON d.doctor_id = a.doctor_id
+           WHERE p.prescription_id = $1 AND d.user_id = $2
+           FOR UPDATE OF p`,
+          [prescriptionId.data, user.userId]
+        );
+
+        if (!existing.rows[0]) {
+          await client.query("ROLLBACK");
+          return NextResponse.json({ error: "Prescription not found." }, { status: 404 });
+        }
+
+        await client.query(
+          "DELETE FROM prescription_items WHERE prescription_id = $1",
+          [prescriptionId.data]
+        );
+        await client.query(
+          "DELETE FROM prescriptions WHERE prescription_id = $1",
+          [prescriptionId.data]
+        );
+        await client.query("COMMIT");
+
+        return NextResponse.json({ message: "Prescription removed." }, { status: 200 });
+  } catch (error) {
+    if (client) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Prescription deletion rollback failed:", rollbackError);
+      }
+    }
+    return errorResponse(error);
+  } finally {
+    client?.release();
+  }
+}
