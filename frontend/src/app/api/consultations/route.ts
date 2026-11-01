@@ -61,6 +61,7 @@ function errorResponse(error: unknown): NextResponse {
 
 export async function POST(request: Request) {
   let client;
+  let pool: ReturnType<typeof getPostgresPool> | undefined;
   let insertedMongoDocumentId: string | undefined;
   let consultationIdForError: string | undefined;
 
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
     const input = consultationInputSchema.parse(await request.json());
     const consultationId = input.consultationId ?? randomUUID();
     consultationIdForError = consultationId;
-    const pool = getPostgresPool();
+    pool = getPostgresPool();
     client = await pool.connect();
 
     await client.query("BEGIN");
@@ -174,9 +175,10 @@ export async function POST(request: Request) {
     await client.query(
       `INSERT INTO consultations
        (consultation_id, appointment_id, consultation_status)
-       VALUES ($1, $2, 'IN_PROGRESS')`,
+       VALUES ($1, $2, 'PENDING')`,
       [consultationId, input.appointmentId]
     );
+    await client.query("COMMIT");
 
     const document: ConsultationDocument = {
       consultationId,
@@ -194,6 +196,7 @@ export async function POST(request: Request) {
     const inserted = await collection.insertOne(document);
     insertedMongoDocumentId = inserted.insertedId.toString();
 
+    await client.query("BEGIN");
     await client.query(
       `UPDATE consultations
        SET mongo_document_id = $1,
@@ -219,6 +222,19 @@ export async function POST(request: Request) {
         await client.query("ROLLBACK");
       } catch (rollbackError) {
         console.error("Consultation transaction rollback failed:", rollbackError);
+      }
+      if (consultationIdForError && pool) {
+        try {
+          await pool.query(
+            `UPDATE consultations
+             SET consultation_status = 'FAILED',
+                 completed_at = NULL
+             WHERE consultation_id = $1`,
+            [consultationIdForError]
+          );
+        } catch (updateError) {
+          console.error("Failed to mark consultation as failed:", updateError);
+        }
       }
     }
 
