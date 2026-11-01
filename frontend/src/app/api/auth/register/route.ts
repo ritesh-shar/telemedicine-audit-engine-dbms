@@ -3,7 +3,6 @@ import { hash } from "bcryptjs";
 
 import { withTransaction } from "../../../../lib/postgres";
 import { patientRegistrationSchema } from "../../../../lib/validation";
-import { setSessionCookie } from "../../../../lib/auth"; // Optional: Issue cookie on signup
 
 export const runtime = "nodejs";
 
