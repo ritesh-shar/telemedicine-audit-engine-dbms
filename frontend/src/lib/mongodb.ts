@@ -54,13 +54,14 @@ function getClientPromise(): MongoClientPromise {
   }
 
   const { uri } = getMongoConfig();
-  clientPromise = new MongoClient(uri).connect();
+  const nextClientPromise = new MongoClient(uri).connect();
+  clientPromise = nextClientPromise;
 
   if (process.env.NODE_ENV === "development") {
-    global.mongodbClientPromise = clientPromise;
+    global.mongodbClientPromise = nextClientPromise;
   }
 
-  return clientPromise;
+  return nextClientPromise;
 }
 
 export async function getMongoDb(): Promise<Db> {
