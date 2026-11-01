@@ -38,7 +38,16 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace(data.user?.role === "PATIENT" ? "/patient" : "/doctors");
+      const role = data.user?.role;
+      router.replace(
+        role === "PATIENT"
+          ? "/patient"
+          : role === "DOCTOR"
+            ? "/doctor"
+            : role === "ADMIN"
+              ? "/admin/audit"
+              : "/doctors"
+      );
       router.refresh();
     } catch {
       setError("Unable to contact the server. Please try again.");
@@ -76,6 +85,9 @@ export default function LoginPage() {
         </form>
         <p className="mt-7 text-center text-sm text-slate-600">
           New patient? <Link href="/register" className="font-semibold text-teal-700 hover:underline">Create an account</Link>
+        </p>
+        <p className="mt-3 text-center text-xs text-slate-500">
+          Doctors and administrators sign in with accounts provisioned by the system administrator.
         </p>
       </section>
     </main>
