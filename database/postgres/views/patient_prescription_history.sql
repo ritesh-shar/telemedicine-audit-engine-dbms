@@ -25,4 +25,4 @@ JOIN patients patient ON patient.patient_id = a.patient_id
 JOIN users patient_user ON patient_user.user_id = patient.user_id
 JOIN doctors d ON d.doctor_id = a.doctor_id
 JOIN users doctor_user ON doctor_user.user_id = d.user_id
-JOIN prescription_items pi ON pi.prescription_id = p.prescription_id;
+LEFT JOIN prescription_items pi ON pi.prescription_id = p.prescription_id;
