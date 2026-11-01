@@ -24,3 +24,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.field {
+  width: 100%;
+  border: 1px solid rgb(51 65 85);
+  border-radius: 0.75rem;
+  background: rgb(2 6 23);
+  color: white;
+  padding: 0.7rem 0.85rem;
+  outline: none;
+}
+
+.field:focus {
+  border-color: rgb(34 211 238);
+  box-shadow: 0 0 0 2px rgb(34 211 238 / 0.15);
+}
+
+.button-primary,
+.button-secondary {
+  border-radius: 9999px;
+  padding: 0.7rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: opacity 150ms ease, background-color 150ms ease;
+}
+
+.button-primary {
+  background: rgb(34 211 238);
+  color: rgb(2 6 23);
+}
+
+.button-secondary {
+  border: 1px solid rgb(71 85 105);
+  color: rgb(165 243 252);
+}
+
+.button-primary:disabled,
+.button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
