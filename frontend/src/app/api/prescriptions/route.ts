@@ -13,8 +13,6 @@ import { getPostgresPool } from "@/lib/postgres";
 interface PrescriptionRow {
   prescription_id: string;
   consultation_id: string;
-  patient_id: string;
-  doctor_id: string;
   prescribed_at: Date;
   instructions: string | null;
   status: "ACTIVE" | "REVOKED";
@@ -32,6 +30,8 @@ interface PrescriptionItemRow {
 }
 
 interface PrescriptionListRow extends PrescriptionRow {
+  patient_id: string;
+  doctor_id: string;
   item_id: string | null;
   item_prescription_id: string | null;
   medicine_name: string | null;
@@ -147,14 +147,12 @@ export async function POST(request: Request) {
 
     const prescriptionResult = await client.query<PrescriptionRow>(
       `INSERT INTO prescriptions
-         (consultation_id, patient_id, doctor_id, instructions)
-       VALUES ($1, $2, $3, $4)
-       RETURNING prescription_id, consultation_id, patient_id, doctor_id,
+         (consultation_id, instructions)
+       VALUES ($1, $2)
+       RETURNING prescription_id, consultation_id,
                  prescribed_at, instructions, status`,
       [
         consultation.consultation_id,
-        consultation.patient_id,
-        consultation.doctor_id,
         input.instructions ?? null
       ]
     );
@@ -215,7 +213,7 @@ export async function GET() {
     const parameters = user.role === "ADMIN" ? [] : [user.userId];
 
     const result = await pool.query<PrescriptionListRow>(
-      `SELECT p.prescription_id, p.consultation_id, p.patient_id, p.doctor_id,
+      `SELECT p.prescription_id, p.consultation_id, a.patient_id, a.doctor_id,
               p.prescribed_at, p.instructions, p.status,
               pi.item_id, pi.prescription_id AS item_prescription_id,
               pi.medicine_name, pi.dosage, pi.frequency, pi.duration,

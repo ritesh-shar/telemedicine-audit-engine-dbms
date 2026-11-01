@@ -61,13 +61,11 @@ VALUES (
 );
 
 INSERT INTO prescriptions (
-  prescription_id, consultation_id, patient_id, doctor_id, instructions
+  prescription_id, consultation_id, instructions
 )
 VALUES (
   '00000000-0000-0000-0000-000000000041',
   '00000000-0000-0000-0000-000000000031',
-  '00000000-0000-0000-0000-000000000012',
-  '00000000-0000-0000-0000-000000000011',
   'Take with water'
 );
 
@@ -118,13 +116,11 @@ DO $$
 BEGIN
   BEGIN
     INSERT INTO prescriptions (
-      prescription_id, consultation_id, patient_id, doctor_id
+      prescription_id, consultation_id
     )
     VALUES (
       '00000000-0000-0000-0000-000000000042',
-      '00000000-0000-0000-0000-000000000031',
-      '00000000-0000-0000-0000-000000000012',
-      '00000000-0000-0000-0000-000000000011'
+      '00000000-0000-0000-0000-000000000031'
     );
     INSERT INTO prescription_items (
       prescription_id, medicine_name, dosage, frequency, duration, quantity
