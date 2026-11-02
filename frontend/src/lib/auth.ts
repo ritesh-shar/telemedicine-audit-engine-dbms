@@ -74,7 +74,7 @@ function getSessionSecret(): Uint8Array {
 function getCookieOptions() {
   return {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.COOKIE_SECURE === "true",
     sameSite: "lax" as const,
     path: "/",
     maxAge: SESSION_DURATION_SECONDS,

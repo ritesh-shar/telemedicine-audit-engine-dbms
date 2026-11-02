@@ -2,10 +2,10 @@ CREATE OR REPLACE VIEW patient_prescription_history AS
 SELECT
     p.prescription_id,
     p.consultation_id,
-    p.patient_id,
+    a.patient_id,
     patient_user.user_id AS patient_user_id,
     patient_user.full_name AS patient_name,
-    p.doctor_id,
+    a.doctor_id,
     doctor_user.user_id AS doctor_user_id,
     doctor_user.full_name AS doctor_name,
     p.prescribed_at,

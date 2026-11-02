@@ -67,6 +67,9 @@ export default function RegisterPage() {
         <p className="mt-2 text-sm text-slate-500">
           Register as a patient to book consultations and manage appointments.
         </p>
+        <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          Doctor accounts are provisioned separately and cannot be created through public patient registration.
+        </p>
 
         {success ? (
           <div className="mt-7 rounded-xl border border-green-200 bg-green-50 p-5">
