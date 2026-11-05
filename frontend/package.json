@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run --exclude scripts/**",
+    "test": "vitest run",
     "test:http": "node scripts/http-workflow.mjs",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
