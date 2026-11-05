@@ -298,6 +298,8 @@ export async function GET(request: NextRequest) {
         a.status,
         a.reason,
         a.created_at AS "createdAt",
+        c.consultation_id AS "consultationId",
+        c.consultation_status AS "consultationStatus",
         d.doctor_id AS "doctorId",
         du.full_name AS "doctorName",
         d.specialization AS "doctorSpecialization",
@@ -308,6 +310,8 @@ export async function GET(request: NextRequest) {
       JOIN users du ON du.user_id = d.user_id
       JOIN patients p ON p.patient_id = a.patient_id
       JOIN users pu ON pu.user_id = p.user_id
+      LEFT JOIN consultations c
+        ON c.appointment_id = a.appointment_id
     `;
 
     let query: string;
